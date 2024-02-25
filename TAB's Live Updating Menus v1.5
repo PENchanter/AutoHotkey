@@ -1,0 +1,47 @@
+#Requires AutoHotkey v1.1
+#Persistent
+#SingleInstance Force
+#NoEnv
+#NoTrayIcon
+
+;	Author: Tabberman / TAB Nation 2024-02-22
+;	EDIT'd by: PENchanter 2024-02-23
+
+TopMenu := "C:\_PENsTools_\PEN's Shortcuts"
+LastMenu := TopMenu
+
+; Loop through folders/files recursing subfolders.
+; Loop Files, %TopMenu%*.*, DFR
+Loop Files, %TopMenu%\*.*, F
+	{
+		; Skip any file that is H, R, or S (System).
+		If InStr(A_LoopFileAttrib, "H")
+			or InStr(A_LoopFileAttrib, "R")
+			or InStr(A_LoopFileAttrib, "S")
+			  Continue
+
+		; Add to Menu
+		Menu, %A_LoopFileDir%, Add, %A_LoopFileName%, Action
+
+		; Attach submenu
+		If (A_LoopFileDir != LastMenu)
+			and (LastMenu != TopMenu)
+				AddMenu(LastMenu)
+
+		; Save menu name
+		LastMenu := A_LoopFileDir
+	}
+
+AddMenu(LastMenu)
+Menu, %TopMenu%, Show
+Return
+
+Action:
+	Run, % A_ThisMenu . "\" . A_ThisMenuItem	; added '\' between the "double-quotes" to get this to work
+ExitApp	; this script is executed via a hotkey, so should exit after a selection is made
+
+AddMenu(MenuName) ; Attach submenu to next level
+	{
+		SplitPath, MenuName , DirName, OutDir
+		Menu, %OutDir%, Add, %DirName%, :%MenuName%
+	}
